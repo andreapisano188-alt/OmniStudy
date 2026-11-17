@@ -2,10 +2,13 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ command, mode }) => {
+  // Se stiamo compilando specificamente per GitHub Pages, usiamo il path del repo
+  // Altrimenti (per l'app mobile o sviluppo locale) usiamo './'
+  const isGitHubPages = mode === 'gh-pages' || process.env.GITHUB_ACTIONS === 'true';
+
   return {
     plugins: [react()],
-    // Rileva automaticamente GitHub Actions e imposta il percorso corretto
-    base: process.env.GITHUB_ACTIONS ? '/OmniStudy/' : './',
+    base: isGitHubPages ? '/OmniStudy/' : './',
     server: {
       port: 3000,
       host: true
@@ -17,3 +20,4 @@ export default defineConfig(({ command, mode }) => {
     }
   };
 });
+
