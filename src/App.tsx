@@ -18,6 +18,14 @@ import { SearchModal } from './components/SearchModal';
 import { ExportModal } from './components/ExportModal';
 import { SettingsModal } from './components/SettingsModal';
 import { BookOpen, Brain, Clock, Target, Plus, Sparkles, Sigma } from 'lucide-react';
+import { 
+  getSavedFirebaseConfig, 
+  getSyncRoomId, 
+  initializeFirebaseSync, 
+  pushStateToCloud, 
+  subscribeToSyncStatus, 
+  SyncStatus 
+} from './services/firebaseSyncService';
 
 const LOCAL_STORAGE_KEY = 'omnistudy_v1_state';
 
@@ -58,6 +66,34 @@ export const App: React.FC = () => {
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [studyFlashcardPageId, setStudyFlashcardPageId] = useState<string | null>(null);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>('disconnected');
+
+  // Auto-connect to Firebase Cloud Sync if config exists
+  useEffect(() => {
+    const unsubscribe = subscribeToSyncStatus((status) => {
+      setSyncStatus(status);
+    });
+
+    const cfg = getSavedFirebaseConfig();
+    if (cfg) {
+      const room = getSyncRoomId();
+      initializeFirebaseSync(cfg, room, (remoteData) => {
+        setState((prev) => ({
+          ...prev,
+          ...remoteData,
+          activeView: prev.activeView,
+          theme: prev.theme,
+        }));
+      });
+    }
+
+    return () => unsubscribe();
+  }, []);
+
+  // Sync state changes to Cloud (debounced)
+  useEffect(() => {
+    pushStateToCloud(state);
+  }, [state.subjects, state.pages, state.flashcards, state.exams, state.studySessions]);
 
   // Sync state to LocalStorage
   useEffect(() => {
@@ -346,11 +382,13 @@ export const App: React.FC = () => {
           activePage={activePage}
           activeSubject={activeSubject}
           theme={state.theme}
+          syncStatus={syncStatus}
           onToggleTheme={handleToggleTheme}
           onOpenSearch={() => setIsSearchOpen(true)}
           onOpenGemini={() => setState((prev) => ({ ...prev, activeView: 'gemini' }))}
           onOpenWolfram={() => setState((prev) => ({ ...prev, activeView: 'wolfram' }))}
           onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenSync={() => setIsExportOpen(true)}
         />
 
         {/* Dynamic View Content */}

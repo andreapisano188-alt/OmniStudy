@@ -80,4 +80,5 @@ cd android
 - ⏱️ **Timer Pomodoro**: cicli studio da 25m e pause con chime sonoro via Web Audio API.
 - 🎯 **Tracker Esami**: conto alla rovescia per gli appelli d'esame e percentuale di completamento programma.
 - 🎙️ **Dettatura Vocale**: parla per scrivere appunti in italiano.
-- 💾 **Sincronizzazione Facile**: esporta e importa file `.json` per trasferire note tra Mac, iPhone e Android senza bisogno di cloud proprietari.
+- ☁️ **Sincronizzazione Automatica Cloud (Firebase JSON)**: sincronizzazione automatica bidirezionale in tempo reale tra tutti i dispositivi Android, iPhone e Mac caricando semplicemente il file `google-services.json` o `firebase-config.json`.
+- 💾 **Backup Locale Facile**: esporta e importa file `.json` per trasferire o salvare note senza dipendere da internet.

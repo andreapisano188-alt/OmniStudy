@@ -1,6 +1,7 @@
 import React from 'react';
-import { Menu, Search, Sun, Moon, Sparkles, Sigma, Settings } from 'lucide-react';
+import { Menu, Search, Sun, Moon, Sparkles, Sigma, Settings, Cloud, CloudOff, RefreshCw } from 'lucide-react';
 import { Page, Subject } from '../types';
+import { SyncStatus } from '../services/firebaseSyncService';
 
 interface NavbarProps {
   onToggleMobileSidebar: () => void;
@@ -8,11 +9,13 @@ interface NavbarProps {
   activePage?: Page;
   activeSubject?: Subject;
   theme: 'dark' | 'light';
+  syncStatus?: SyncStatus;
   onToggleTheme: () => void;
   onOpenSearch: () => void;
   onOpenGemini: () => void;
   onOpenWolfram: () => void;
   onOpenSettings: () => void;
+  onOpenSync?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -21,11 +24,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   activePage,
   activeSubject,
   theme,
+  syncStatus = 'disconnected',
   onToggleTheme,
   onOpenSearch,
   onOpenGemini,
   onOpenWolfram,
   onOpenSettings,
+  onOpenSync,
 }) => {
   return (
     <header className="h-12 min-h-[3rem] border-b border-notion-border-light dark:border-notion-border-dark flex items-center justify-between px-3 md:px-6 bg-white/90 dark:bg-notion-bg-dark/90 backdrop-blur-md sticky top-0 z-30 select-none app-drag">
@@ -91,6 +96,45 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Right: Action Buttons */}
       <div className="flex items-center space-x-1 flex-shrink-0 app-no-drag">
+        {/* Cloud Sync Status Button */}
+        {onOpenSync && (
+          <button
+            onClick={onOpenSync}
+            className={`p-1.5 rounded-xl transition-colors flex items-center space-x-1 text-xs font-medium ${
+              syncStatus === 'connected'
+                ? 'text-emerald-500 hover:bg-emerald-500/10'
+                : syncStatus === 'syncing'
+                ? 'text-blue-500 hover:bg-blue-500/10'
+                : syncStatus === 'error'
+                ? 'text-red-500 hover:bg-red-500/10'
+                : 'text-gray-400 hover:bg-black/5 dark:hover:bg-white/10'
+            }`}
+            title={
+              syncStatus === 'connected'
+                ? 'Cloud Sincronizzato (Tutti i dispositivi aggiornati)'
+                : syncStatus === 'syncing'
+                ? 'Sincronizzazione in corso...'
+                : syncStatus === 'error'
+                ? 'Errore Sincronizzazione Cloud'
+                : 'Configura Sincronizzazione Cloud'
+            }
+          >
+            {syncStatus === 'connected' ? (
+              <span className="relative flex items-center">
+                <Cloud size={16} />
+                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-notion-bg-dark" />
+              </span>
+            ) : syncStatus === 'syncing' ? (
+              <RefreshCw size={16} className="animate-spin text-blue-500" />
+            ) : (
+              <CloudOff size={16} />
+            )}
+            <span className="hidden sm:inline text-[11px] font-semibold">
+              {syncStatus === 'connected' ? 'Sincronizzato' : syncStatus === 'syncing' ? 'Sync...' : 'Sync'}
+            </span>
+          </button>
+        )}
+
         {/* Gemini Quick Button */}
         <button
           onClick={onOpenGemini}
